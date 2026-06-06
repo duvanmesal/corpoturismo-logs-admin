@@ -1,0 +1,301 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Corpoturismo · Panel de Logs — Warm Admin
+   ------------------------------------------------------------
+   Profesional pero acogedor: base cálida (crema / arena / tinta
+   espresso), un solo acento terracota amigable, esquinas suaves
+   y sombras tibias. Doble tema (claro cálido por defecto + oscuro
+   espresso). Convención del proyecto: color como triplete RGB
+   usado vía rgb(var(--color-*)).
+   ============================================================ */
+
+@theme inline {
+  /* ── Superficies (claro cálido) ── */
+  --color-bg:          250 245 238;  /* #FAF5EE crema */
+  --color-bg-elevated: 255 252 247;  /* #FFFCF7 marfil */
+  --color-surface:     255 255 255;  /* #FFFFFF tarjetas */
+  --color-surface-2:   244 237 228;  /* #F4EDE4 arena (hover) */
+
+  /* ── Texto (tinta cálida, no negro frío) ── */
+  --color-fg:           38 33 29;    /* #26211D espresso */
+  --color-fg-secondary: 92 81 71;    /* #5C5147 taupe */
+  --color-muted:        146 133 120; /* #928578 */
+
+  /* ── Líneas (cálidas, a baja opacidad) ── */
+  --color-border: 92 71 51;          /* base cálida para bordes */
+
+  /* ── Acento único: terracota amigable (tono profundo para contraste AA) ── */
+  --color-primary:      176 74 44;   /* #B04A2C terracota */
+  --color-primary-dark: 150 60 35;   /* #963C23 */
+  --color-ring:         176 74 44;
+
+  /* ── Semánticos por nivel (distintos del acento) ── */
+  --color-debug:   120 113 108; /* #78716C piedra */
+  --color-info:    37 99 235;   /* #2563EB azul */
+  --color-warn:    202 138 4;   /* #CA8A04 ámbar/amarillo */
+  --color-error:   198 40 40;   /* #C62828 rojo */
+  --color-success: 21 128 61;   /* #15803D verde */
+
+  /* ── Radii (suaves, acogedores) ── */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  /* ── Sombras (tibias, difusas) ── */
+  --shadow-sm: 0 1px 2px rgba(70, 50, 35, 0.06), 0 1px 3px rgba(70, 50, 35, 0.05);
+  --shadow-md: 0 2px 6px rgba(70, 50, 35, 0.06), 0 8px 24px rgba(70, 50, 35, 0.08);
+  --shadow-lg: 0 4px 12px rgba(70, 50, 35, 0.08), 0 18px 48px rgba(70, 50, 35, 0.12);
+
+  /* ── Tipografía: amigable pero profesional ── */
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", Menlo,
+    Consolas, monospace;
+}
+
+/* ── Tema oscuro: espresso cálido ── */
+.dark {
+  --color-bg:          26 22 20;    /* #1A1614 espresso oscuro */
+  --color-bg-elevated: 35 29 26;    /* #231D1A */
+  --color-surface:     42 35 31;    /* #2A231F */
+  --color-surface-2:   56 47 41;    /* #382F29 (hover) */
+
+  --color-fg:           242 235 227; /* #F2EBE3 marfil */
+  --color-fg-secondary: 188 175 163; /* #BCAFA3 */
+  --color-muted:        140 127 115; /* #8C7F73 */
+
+  --color-border: 188 175 163;       /* cálido claro a baja opacidad */
+
+  --color-primary:      230 126 90;  /* #E67E5A terracota cálido */
+  --color-primary-dark: 198 92 58;
+  --color-ring:         230 126 90;
+
+  --color-debug:   168 162 158;
+  --color-info:    96 165 250;
+  --color-warn:    251 191 36;
+  --color-error:   248 113 113;
+  --color-success: 74 222 128;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: rgb(var(--color-bg));
+  color: rgb(var(--color-fg));
+  font-family: var(--font-sans);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fondo acogedor: lavado radial cálido + cuadrícula de puntos muy tenue */
+.app-grid-bg {
+  background-color: rgb(var(--color-bg));
+  background-image:
+    radial-gradient(
+      1100px 620px at 12% -8%,
+      rgba(var(--color-primary), 0.07),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 600px at 100% 0%,
+      rgba(var(--color-warn), 0.05),
+      transparent 55%
+    ),
+    radial-gradient(circle, rgba(var(--color-border), 0.05) 1px, transparent 1px);
+  background-size: auto, auto, 26px 26px;
+}
+
+/* ============================================================
+   Superficies
+   ============================================================ */
+
+.panel {
+  background: rgb(var(--color-surface));
+  border: 1px solid rgba(var(--color-border), 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* Tarjeta interactiva con elevación suave al pasar el cursor */
+.panel-hover {
+  transition:
+    transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.18s ease;
+}
+.panel-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(var(--color-primary), 0.28);
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px rgba(var(--color-ring), 0.32);
+}
+
+/* Anillo de foco para contenedores que envuelven un input (p. ej. la barra de búsqueda) */
+.focus-within-ring:focus-within {
+  border-color: rgba(var(--color-primary), 0.4);
+  box-shadow: 0 0 0 3px rgba(var(--color-ring), 0.32);
+}
+
+/* ============================================================
+   Tabla de logs — alta legibilidad
+   ============================================================ */
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.logs-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgb(var(--color-muted));
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid rgba(var(--color-border), 0.14);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: rgb(var(--color-bg-elevated));
+  z-index: 1;
+}
+
+.logs-table td {
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid rgba(var(--color-border), 0.07);
+  vertical-align: middle;
+}
+
+/* Columnas numéricas alineadas a la derecha para lectura tabular */
+.logs-table th.num,
+.logs-table td.num {
+  text-align: right;
+}
+
+.logs-table tbody tr {
+  transition: background-color 0.12s ease;
+}
+.logs-table tbody tr:hover {
+  background: rgba(var(--color-primary), 0.05);
+}
+.logs-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+/* ============================================================
+   Animaciones
+   ============================================================ */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.28s ease-out both;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -480px 0;
+  }
+  100% {
+    background-position: 480px 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--color-border), 0.07) 25%,
+    rgba(var(--color-border), 0.13) 37%,
+    rgba(var(--color-border), 0.07) 63%
+  );
+  background-size: 900px 100%;
+  animation: shimmer 1.6s infinite linear;
+  border-radius: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin {
+  animation: spin 0.7s linear infinite;
+}
+
+/* ============================================================
+   Scrollbar (cálida)
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--color-primary), 0.22);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--color-primary), 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
