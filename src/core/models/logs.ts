@@ -64,6 +64,57 @@ export interface LogsStatsParams {
   tz?: string
 }
 
+// Facets — valores distintos por dimensión (para poblar filtros).
+export interface LogsFacets {
+  services: Array<{ value: string; count: number }>
+  modules: Array<{ value: string; count: number }>
+  events: Array<{ value: string; count: number }>
+  levels: Array<{ value: string; count: number }>
+  methods: Array<{ value: string; count: number }>
+  statusCodes: Array<{ value: number; count: number }>
+  actors: Array<{ value: string; count: number }>
+  targets: Array<{ value: string; count: number }>
+}
+
+export interface LogsFacetsParams {
+  from?: string
+  to?: string
+  level?: LogLevel
+  service?: string
+  action?: string
+  userId?: string
+  q?: string
+  module?: string
+  method?: string
+  statusCode?: number
+  limit?: number
+}
+
+// Timeline — conteos por bucket de tiempo desglosados por nivel.
+export interface LogsTimelineBucket {
+  ts: string
+  debug: number
+  info: number
+  warn: number
+  error: number
+  total: number
+}
+
+export interface LogsTimelineParams {
+  from: string
+  to: string
+  level?: LogLevel
+  service?: string
+  action?: string
+  userId?: string
+  q?: string
+  module?: string
+  method?: string
+  statusCode?: number
+  bucket?: "minute" | "hour" | "day"
+  tz?: string
+}
+
 // Filtros del panel. Fase 3 añade method/statusCode/module (soportados por el proxy).
 export interface LogsListParams {
   page?: number

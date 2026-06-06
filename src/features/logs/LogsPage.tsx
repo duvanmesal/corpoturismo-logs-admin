@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import type { FormEvent } from "react"
+import { useSearchParams } from "react-router-dom"
 import { RefreshCw, Search, X, ServerCrash, AlertTriangle, SlidersHorizontal } from "lucide-react"
 import {
   LogLevel,
@@ -17,9 +18,11 @@ import {
   type AdvancedDraft,
 } from "./components/AdvancedFilters"
 import { Pagination } from "@/shared/components/Pagination"
+import { PageHeader } from "@/shared/components/PageHeader"
 import { extractApiError, extractApiErrorCode } from "@/core/utils/api-error"
 import { logsApi, type LogsExportFilters } from "@/core/api/logs.api"
 import { downloadBlob } from "@/core/utils/download"
+import { useState } from "react"
 
 const PAGE_SIZE = 25
 const LEVEL_OPTIONS: Array<{ value: "" | LogLevelType; label: string }> = [
@@ -30,43 +33,115 @@ const LEVEL_OPTIONS: Array<{ value: "" | LogLevelType; label: string }> = [
   { value: LogLevel.error, label: "Error" },
 ]
 
-/** Convierte un valor de <input datetime-local> a ISO UTC, o undefined. */
 function toIso(localValue: string): string | undefined {
   if (!localValue) return undefined
   const d = new Date(localValue)
   return Number.isNaN(d.getTime()) ? undefined : d.toISOString()
 }
 
-/** Filtros avanzados aplicados, ya normalizados al contrato del proxy. */
-function draftToParams(d: AdvancedDraft): Partial<LogsListParams> {
-  const statusCode = d.statusCode.trim() ? Number(d.statusCode.trim()) : undefined
+// Maps search-param string to AdvancedDraft fields
+function paramsToAdvancedDraft(sp: URLSearchParams): AdvancedDraft {
   return {
-    service: d.service.trim() || undefined,
-    action: d.action.trim() || undefined,
-    userId: d.userId.trim() || undefined,
-    requestId: d.requestId.trim() || undefined,
-    method: d.method || undefined,
-    statusCode: Number.isFinite(statusCode) ? statusCode : undefined,
-    module: d.module.trim() || undefined,
-    from: toIso(d.from),
-    to: toIso(d.to),
+    service: sp.get("service") ?? "",
+    action: sp.get("action") ?? "",
+    userId: sp.get("userId") ?? "",
+    requestId: sp.get("requestId") ?? "",
+    method: sp.get("method") ?? "",
+    statusCode: sp.get("statusCode") ?? "",
+    module: sp.get("module") ?? "",
+    from: sp.get("from") ?? "",
+    to: sp.get("to") ?? "",
   }
 }
 
-export function LogsPage() {
-  const [page, setPage] = useState(1)
-  const [level, setLevel] = useState<"" | LogLevelType>("")
-  const [searchInput, setSearchInput] = useState("")
-  const [q, setQ] = useState("")
+function draftToSearchParams(draft: AdvancedDraft): Record<string, string> {
+  const out: Record<string, string> = {}
+  if (draft.service) out.service = draft.service
+  if (draft.action) out.action = draft.action
+  if (draft.userId) out.userId = draft.userId
+  if (draft.requestId) out.requestId = draft.requestId
+  if (draft.method) out.method = draft.method
+  if (draft.statusCode) out.statusCode = draft.statusCode
+  if (draft.module) out.module = draft.module
+  if (draft.from) out.from = draft.from
+  if (draft.to) out.to = draft.to
+  return out
+}
 
+function paramsToApiParams(sp: URLSearchParams): Partial<LogsListParams> {
+  const statusCode = sp.get("statusCode")
+  const sc = statusCode ? Number(statusCode) : undefined
+  return {
+    service: sp.get("service") || undefined,
+    action: sp.get("action") || undefined,
+    userId: sp.get("userId") || undefined,
+    requestId: sp.get("requestId") || undefined,
+    method: sp.get("method") || undefined,
+    statusCode: sc && Number.isFinite(sc) ? sc : undefined,
+    module: sp.get("module") || undefined,
+    from: sp.get("from") ? toIso(sp.get("from")!) : undefined,
+    to: sp.get("to") ? toIso(sp.get("to")!) : undefined,
+  }
+}
+
+// Human-readable label for each filter chip
+const CHIP_LABELS: Record<string, string> = {
+  q: "Búsqueda",
+  level: "Nivel",
+  service: "Servicio",
+  action: "Evento",
+  userId: "Usuario",
+  requestId: "Request ID",
+  method: "Método",
+  statusCode: "Código HTTP",
+  module: "Módulo",
+  from: "Desde",
+  to: "Hasta",
+}
+
+const ADVANCED_KEYS = ["service", "action", "userId", "requestId", "method", "statusCode", "module", "from", "to"]
+
+export function LogsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "")
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [draft, setDraft] = useState<AdvancedDraft>(emptyAdvancedDraft)
-  const [advanced, setAdvanced] = useState<Partial<LogsListParams>>({})
+  const [draft, setDraft] = useState<AdvancedDraft>(() => paramsToAdvancedDraft(searchParams))
 
   const [selectedLog, setSelectedLog] = useState<LogItem | null>(null)
-
   const [isExporting, setIsExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
+
+  // Derive all filter state from URL
+  const page = Number(searchParams.get("page") ?? "1")
+  const level = (searchParams.get("level") ?? "") as "" | LogLevelType
+  const q = searchParams.get("q") ?? ""
+  const advanced = paramsToApiParams(searchParams)
+
+  function setParam(key: string, value: string | null) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (value) {
+        next.set(key, value)
+      } else {
+        next.delete(key)
+      }
+      next.set("page", "1")
+      return next
+    })
+  }
+
+  function removeChip(key: string) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete(key)
+      next.set("page", "1")
+      return next
+    })
+    if (key === "q") setSearchInput("")
+    if (ADVANCED_KEYS.includes(key)) {
+      setDraft((d) => ({ ...d, [key === "action" ? "action" : key]: "" }))
+    }
+  }
 
   const params: LogsListParams = useMemo(
     () => ({
@@ -77,7 +152,7 @@ export function LogsPage() {
       q: q || undefined,
       ...advanced,
     }),
-    [page, level, q, advanced],
+    [page, level, q, JSON.stringify(advanced)], // eslint-disable-line react-hooks/exhaustive-deps
   )
 
   const { data, isLoading, isFetching, isError, error, refetch } = useLogs(params)
@@ -85,32 +160,44 @@ export function LogsPage() {
   const logs = data?.data ?? []
   const meta = data?.meta ?? null
 
-  const advancedCount = Object.values(advanced).filter((v) => v != null && v !== "").length
-  const hasActiveFilters = level !== "" || q !== "" || advancedCount > 0
+  const activeChips = useMemo(() => {
+    const chips: Array<{ key: string; label: string; value: string }> = []
+    for (const [key, val] of searchParams.entries()) {
+      if (key === "page") continue
+      const label = CHIP_LABELS[key] ?? key
+      chips.push({ key, label, value: String(val) })
+    }
+    return chips
+  }, [searchParams])
+
+  const hasActiveFilters = activeChips.length > 0
+
+  const canExport = Boolean(advanced.from && advanced.to)
 
   const onSearchSubmit = (e: FormEvent) => {
     e.preventDefault()
-    setPage(1)
-    setQ(searchInput.trim())
+    setParam("q", searchInput.trim() || null)
   }
 
   const onApplyAdvanced = () => {
-    setPage(1)
-    setAdvanced(draftToParams(draft))
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      // Clear old advanced params
+      for (const k of ADVANCED_KEYS) next.delete(k)
+      // Set new ones
+      const applied = draftToSearchParams(draft)
+      for (const [k, v] of Object.entries(applied)) next.set(k, v)
+      next.set("page", "1")
+      return next
+    })
   }
 
   const onClearFilters = () => {
     setSearchInput("")
-    setQ("")
-    setLevel("")
     setDraft(emptyAdvancedDraft)
-    setAdvanced({})
-    setPage(1)
+    setSearchParams({})
     setExportError(null)
   }
-
-  // El export exige rango de fechas (lo valida también el backend).
-  const canExport = Boolean(advanced.from && advanced.to)
 
   const handleExport = async (format: "csv" | "json") => {
     if (!advanced.from || !advanced.to) return
@@ -143,29 +230,21 @@ export function LogsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight text-[rgb(var(--color-fg))]">
-            Registros de actividad
-          </h1>
-          <p className="mt-0.5 text-sm text-[rgb(var(--color-muted))]">
-            Consulta de logs operativos del sistema en tiempo casi real.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <ExportMenu canExport={canExport} isExporting={isExporting} onExport={handleExport} />
-          <button
-            type="button"
-            onClick={() => refetch()}
-            disabled={isFetching}
-            className="focus-ring inline-flex items-center gap-2 rounded-lg border border-[rgb(var(--color-border)/0.16)] bg-[rgb(var(--color-surface))] px-3 py-2 text-sm font-medium text-[rgb(var(--color-fg-secondary))] transition-colors hover:bg-[rgb(var(--color-surface-2))] disabled:opacity-60"
-          >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
-            Refrescar
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Registros de actividad"
+        subtitle="Consulta de logs operativos del sistema en tiempo casi real."
+      >
+        <ExportMenu canExport={canExport} isExporting={isExporting} onExport={handleExport} />
+        <button
+          type="button"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="focus-ring inline-flex items-center gap-2 rounded-lg border border-[rgb(var(--color-border)/0.16)] bg-[rgb(var(--color-surface))] px-3 py-2 text-sm font-medium text-[rgb(var(--color-fg-secondary))] transition-colors hover:bg-[rgb(var(--color-surface-2))] disabled:opacity-60"
+        >
+          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} aria-hidden="true" />
+          Refrescar
+        </button>
+      </PageHeader>
 
       {exportError && (
         <div
@@ -177,7 +256,7 @@ export function LogsPage() {
         </div>
       )}
 
-      {/* Barra rápida de búsqueda */}
+      {/* Quick filter bar */}
       <div className="flex flex-wrap items-center gap-2.5">
         <form
           onSubmit={onSearchSubmit}
@@ -195,10 +274,7 @@ export function LogsPage() {
 
         <select
           value={level}
-          onChange={(e) => {
-            setLevel(e.target.value as "" | LogLevelType)
-            setPage(1)
-          }}
+          onChange={(e) => setParam("level", e.target.value || null)}
           className="focus-ring h-10 rounded-lg border border-[rgb(var(--color-border)/0.16)] bg-[rgb(var(--color-surface))] px-3 text-sm text-[rgb(var(--color-fg))]"
           aria-label="Filtrar por nivel"
         >
@@ -213,17 +289,18 @@ export function LogsPage() {
           type="button"
           onClick={() => setShowAdvanced((v) => !v)}
           aria-expanded={showAdvanced}
-          className={`focus-ring inline-flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition-colors ${
-            showAdvanced || advancedCount > 0
+          className={[
+            "focus-ring inline-flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition-colors",
+            showAdvanced || ADVANCED_KEYS.some((k) => searchParams.has(k))
               ? "border-[rgb(var(--color-primary)/0.4)] bg-[rgb(var(--color-primary)/0.1)] text-[rgb(var(--color-primary))]"
-              : "border-[rgb(var(--color-border)/0.16)] bg-[rgb(var(--color-surface))] text-[rgb(var(--color-fg-secondary))] hover:bg-[rgb(var(--color-surface-2))]"
-          }`}
+              : "border-[rgb(var(--color-border)/0.16)] bg-[rgb(var(--color-surface))] text-[rgb(var(--color-fg-secondary))] hover:bg-[rgb(var(--color-surface-2))]",
+          ].join(" ")}
         >
           <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
           Filtros
-          {advancedCount > 0 && (
+          {ADVANCED_KEYS.filter((k) => searchParams.has(k)).length > 0 && (
             <span className="tabular flex h-5 min-w-5 items-center justify-center rounded-full bg-[rgb(var(--color-primary))] px-1.5 text-[0.6875rem] font-semibold text-[rgb(var(--color-bg))]">
-              {advancedCount}
+              {ADVANCED_KEYS.filter((k) => searchParams.has(k)).length}
             </span>
           )}
         </button>
@@ -239,6 +316,29 @@ export function LogsPage() {
           </button>
         )}
       </div>
+
+      {/* Active filter chips */}
+      {activeChips.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {activeChips.map(({ key, label, value }) => (
+            <span
+              key={key}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--color-border)/0.16)] bg-[rgb(var(--color-surface))] px-2.5 py-1 text-xs font-medium text-[rgb(var(--color-fg-secondary))]"
+            >
+              <span className="text-[rgb(var(--color-muted))]">{label}:</span>
+              <span className="max-w-[12rem] truncate">{value}</span>
+              <button
+                type="button"
+                onClick={() => removeChip(key)}
+                className="ml-0.5 rounded-full p-0.5 hover:bg-[rgb(var(--color-surface-2))] hover:text-[rgb(var(--color-fg))]"
+                aria-label={`Eliminar filtro ${label}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
 
       {showAdvanced && (
         <AdvancedFilters
@@ -262,7 +362,9 @@ export function LogsPage() {
             <p className="text-sm font-medium text-[rgb(var(--color-fg-secondary))]">
               {extractApiError(error)}
             </p>
-            {errorCode && <p className="mono text-xs text-[rgb(var(--color-muted))]">{errorCode}</p>}
+            {errorCode && (
+              <p className="mono text-xs text-[rgb(var(--color-muted))]">{errorCode}</p>
+            )}
             <button
               type="button"
               onClick={() => refetch()}
@@ -281,7 +383,11 @@ export function LogsPage() {
               onRowClick={setSelectedLog}
             />
             {meta && meta.total > 0 && (
-              <Pagination meta={meta} onPageChange={setPage} disabled={isFetching} />
+              <Pagination
+                meta={meta}
+                onPageChange={(p) => setParam("page", String(p))}
+                disabled={isFetching}
+              />
             )}
           </>
         )}

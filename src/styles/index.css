@@ -164,6 +164,45 @@ body {
   box-shadow: 0 0 0 3px rgba(var(--color-ring), 0.32);
 }
 
+/* ── Checkbox personalizado ── */
+.checkbox-field {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 4px;
+  border: 1.5px solid rgba(var(--color-border), 0.35);
+  background: rgb(var(--color-bg));
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.14s ease, background 0.14s ease;
+}
+.checkbox-field:hover {
+  border-color: rgba(var(--color-primary), 0.55);
+}
+.checkbox-field:checked {
+  background: rgb(var(--color-primary));
+  border-color: rgb(var(--color-primary));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5l2.5 2.5 4.5-4.5' stroke='%231A1614' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-size: 10px 10px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.checkbox-field:focus-visible {
+  box-shadow: 0 0 0 3px rgba(var(--color-ring), 0.32);
+}
+
+/* ── Input — hover/focus border ── */
+.input-field {
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+.input-field:hover {
+  border-color: rgba(var(--color-border), 0.4) !important;
+}
+.input-field:focus {
+  border-color: rgba(var(--color-primary), 0.45) !important;
+}
+
 /* ============================================================
    Tabla de logs — alta legibilidad
    ============================================================ */
@@ -285,6 +324,169 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--color-primary), 0.4);
+}
+
+/* ============================================================
+   Sidebar — navegación fija en desktop
+   ============================================================ */
+
+.sidebar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 30;
+  width: 14rem;
+  flex-direction: column;
+  background: rgb(var(--color-bg-elevated));
+  border-right: 1px solid rgba(var(--color-border), 0.1);
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    display: flex;
+  }
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.125rem;
+  border-bottom: 1px solid rgba(var(--color-border), 0.08);
+  flex-shrink: 0;
+}
+
+.sidebar__section-label {
+  padding: 0.75rem 0.875rem 0.25rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(var(--color-muted));
+}
+
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  padding: 0.5625rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+  outline: none;
+  margin-bottom: 2px;
+}
+
+.sidebar__item:focus-visible {
+  box-shadow: 0 0 0 3px rgba(var(--color-ring), 0.32);
+}
+
+.sidebar__item--active {
+  background: rgba(var(--color-primary), 0.12);
+  color: rgb(var(--color-primary));
+}
+
+.sidebar__item--idle {
+  color: rgb(var(--color-fg-secondary));
+}
+
+.sidebar__item--idle:hover {
+  background: rgb(var(--color-surface-2));
+  color: rgb(var(--color-fg));
+}
+
+.sidebar__footer {
+  border-top: 1px solid rgba(var(--color-border), 0.08);
+  padding: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   KPI Stat card — métricas con acento de color superior
+   ============================================================ */
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--color-surface));
+  border: 1px solid rgba(var(--color-border), 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem;
+  transition:
+    transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.18s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-card__stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* ============================================================
+   Tipografía de página — jerarquía semántica
+   ============================================================ */
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: rgb(var(--color-fg));
+}
+
+.page-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: rgb(var(--color-muted));
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Section header — título interno de panel
+   ============================================================ */
+
+.section-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(var(--color-fg));
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
+   Rank badge — numeración en listas ordenadas
+   ============================================================ */
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 4px;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  background: rgba(var(--color-border), 0.1);
+  color: rgb(var(--color-muted));
 }
 
 @media (prefers-reduced-motion: reduce) {

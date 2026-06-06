@@ -5,6 +5,10 @@ import type {
   LogsListParams,
   LogsStats,
   LogsStatsParams,
+  LogsFacets,
+  LogsFacetsParams,
+  LogsTimelineBucket,
+  LogsTimelineParams,
 } from "@/core/models/logs"
 
 // Solo lectura contra el proxy seguro de la API principal.
@@ -35,6 +39,20 @@ export const logsApi = {
       params: cleanParams({ ...params, page: 1, limit: 1 }),
     })
     return res.data.meta?.total ?? 0
+  },
+
+  async facets(params: LogsFacetsParams): Promise<ApiResponse<LogsFacets>> {
+    const res = await http.get<ApiResponse<LogsFacets>>("/admin/logs/facets", {
+      params: cleanParams(params),
+    })
+    return res.data
+  },
+
+  async timeline(params: LogsTimelineParams): Promise<ApiResponse<LogsTimelineBucket[]>> {
+    const res = await http.get<ApiResponse<LogsTimelineBucket[]>>("/admin/logs/timeline", {
+      params: cleanParams(params),
+    })
+    return res.data
   },
 
   // Export: la descarga la genera la API (no el frontend). Requiere from/to.
