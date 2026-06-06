@@ -12,7 +12,6 @@ interface LogDetailDrawerProps {
 }
 
 export function LogDetailDrawer({ log, onClose }: LogDetailDrawerProps) {
-  // Cerrar con Escape.
   useEffect(() => {
     if (!log) return
     const onKey = (e: KeyboardEvent) => {
@@ -27,12 +26,24 @@ export function LogDetailDrawer({ log, onClose }: LogDetailDrawerProps) {
   const logId = log._id ?? log.id
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Detalle del log">
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end md:flex-row md:justify-end"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Detalle del log"
+    >
       <div className="absolute inset-0 bg-black/55" onClick={onClose} aria-hidden="true" />
 
-      <aside className="animate-fade-in-up relative flex h-full w-full max-w-lg flex-col bg-[rgb(var(--color-bg-elevated))] shadow-[var(--shadow-lg)]">
+      {/* Mobile: bottom sheet — Desktop: side panel from right */}
+      <aside className="drawer-sheet relative flex w-full flex-col bg-[rgb(var(--color-bg-elevated))] shadow-[var(--shadow-lg)] max-h-[92dvh] rounded-t-2xl md:h-full md:max-h-none md:max-w-lg md:rounded-none">
+
+        {/* Drag handle — only on mobile */}
+        <div className="flex shrink-0 justify-center pt-3 pb-1 md:hidden" aria-hidden="true">
+          <div className="h-1 w-10 rounded-full bg-[rgb(var(--color-border)/0.3)]" />
+        </div>
+
         {/* Header */}
-        <header className="flex items-start justify-between gap-3 border-b border-[rgb(var(--color-border)/0.1)] px-5 py-4">
+        <header className="flex shrink-0 items-start justify-between gap-3 border-b border-[rgb(var(--color-border)/0.1)] px-5 py-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <LogLevelBadge level={log.level} />

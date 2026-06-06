@@ -25,10 +25,10 @@ export function Pagination({ meta, onPageChange, disabled }: PaginationProps) {
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={disabled || page <= 1}
-          className="focus-ring inline-flex items-center gap-1 rounded-md border border-[rgb(var(--color-border)/0.16)] px-2.5 py-1.5 text-xs font-medium text-[rgb(var(--color-fg-secondary))] transition-colors hover:bg-[rgb(var(--color-surface-2))] disabled:cursor-not-allowed disabled:opacity-40"
+          className="focus-ring inline-flex items-center gap-1 rounded-md border border-[rgb(var(--color-border)/0.16)] px-2 py-1.5 text-xs font-medium text-[rgb(var(--color-fg-secondary))] transition-colors hover:bg-[rgb(var(--color-surface-2))] disabled:cursor-not-allowed disabled:opacity-40 sm:px-2.5"
         >
           <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          Anterior
+          <span className="hidden sm:inline">Anterior</span>
         </button>
         <span className="tabular text-xs text-[rgb(var(--color-muted))]">
           {page} / {Math.max(1, totalPages)}
@@ -37,9 +37,9 @@ export function Pagination({ meta, onPageChange, disabled }: PaginationProps) {
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={disabled || page >= totalPages}
-          className="focus-ring inline-flex items-center gap-1 rounded-md border border-[rgb(var(--color-border)/0.16)] px-2.5 py-1.5 text-xs font-medium text-[rgb(var(--color-fg-secondary))] transition-colors hover:bg-[rgb(var(--color-surface-2))] disabled:cursor-not-allowed disabled:opacity-40"
+          className="focus-ring inline-flex items-center gap-1 rounded-md border border-[rgb(var(--color-border)/0.16)] px-2 py-1.5 text-xs font-medium text-[rgb(var(--color-fg-secondary))] transition-colors hover:bg-[rgb(var(--color-surface-2))] disabled:cursor-not-allowed disabled:opacity-40 sm:px-2.5"
         >
-          Siguiente
+          <span className="hidden sm:inline">Siguiente</span>
           <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>

@@ -327,8 +327,8 @@ export function AlertSettings() {
       )}
 
       {/* Browser notification toggle */}
-      <div className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-[rgb(var(--color-border)/0.12)] bg-[rgb(var(--color-bg))] px-4 py-3.5">
-        <div className="min-w-0">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[rgb(var(--color-border)/0.12)] bg-[rgb(var(--color-bg))] px-4 py-3.5">
+        <div className="min-w-0 flex-1" style={{ minWidth: "180px" }}>
           <p className="text-sm font-semibold text-[rgb(var(--color-fg))]">
             Notificaciones del navegador
           </p>

@@ -278,6 +278,24 @@ body {
   animation: fade-in-up 0.28s ease-out both;
 }
 
+/* ── Drawer: slide desde la derecha en desktop, desde abajo en mobile ── */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes slide-up-sheet {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.drawer-sheet {
+  animation: slide-in-right 0.26s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+@media (max-width: 767px) {
+  .drawer-sheet {
+    animation: slide-up-sheet 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+}
+
 @keyframes shimmer {
   0% {
     background-position: -480px 0;

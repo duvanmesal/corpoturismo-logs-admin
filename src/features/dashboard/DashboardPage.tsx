@@ -144,7 +144,7 @@ export function DashboardPage() {
                       <li key={e.event} className="flex items-center gap-3">
                         <span className="rank-badge">{String(i + 1).padStart(2, "0")}</span>
                         <span
-                          className="mono w-44 shrink-0 truncate text-xs text-[rgb(var(--color-fg-secondary))]"
+                          className="mono w-28 shrink-0 truncate text-xs text-[rgb(var(--color-fg-secondary))] sm:w-40"
                           title={e.event}
                         >
                           {e.event}
@@ -236,25 +236,25 @@ function StatCard({
         className="stat-card__stripe"
         style={{ background: `rgb(var(${token}))` }}
       />
-      <div className="flex items-start justify-between gap-3 pt-0.5">
+      <div className="flex items-start justify-between gap-2 pt-0.5">
         <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9"
           style={{
             color: `rgb(var(${token}))`,
             backgroundColor: `rgba(var(${token}), 0.1)`,
           }}
         >
-          <Icon className="h-[1.05rem] w-[1.05rem]" aria-hidden="true" />
+          <Icon className="h-4 w-4 sm:h-[1.05rem] sm:w-[1.05rem]" aria-hidden="true" />
         </span>
         {loading ? (
-          <div className="skeleton h-8 w-20 self-end" />
+          <div className="skeleton h-7 w-16 self-end sm:h-8 sm:w-20" />
         ) : (
-          <p className="tabular text-[1.875rem] font-bold leading-none tracking-tight text-[rgb(var(--color-fg))]">
+          <p className="tabular text-2xl font-bold leading-none tracking-tight text-[rgb(var(--color-fg))] sm:text-[1.875rem]">
             {value.toLocaleString("es-CO")}
           </p>
         )}
       </div>
-      <p className="mt-3 text-xs font-medium text-[rgb(var(--color-muted))]">{label}</p>
+      <p className="mt-2.5 text-xs font-medium text-[rgb(var(--color-muted))]">{label}</p>
     </div>
   )
 }
